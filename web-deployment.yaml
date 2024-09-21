@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+  namespace: migration-docker-kubernetes
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: naveenbalagouni/latest-images:alpine
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: web-config
+                  key: DATABASE_URL
+          lifecycle:
+            postStart:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+      imagePullSecrets:
+        - name: myregistrykey
